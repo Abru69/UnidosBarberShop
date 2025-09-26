@@ -7,7 +7,8 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'barbero') {
     exit;
 }
 
-$citas_stmt = $pdo->query("SELECT c.id, c.fecha_hora, c.estado, u.nombre AS cliente_nombre, s.nombre AS servicio_nombre FROM citas c JOIN usuarios u ON c.id_cliente = u.id JOIN servicios s ON c.id_servicio = s.id ORDER BY c.fecha_hora ASC");
+// Consulta CORREGIDA para no mostrar citas con estado 'cancelada'
+$citas_stmt = $pdo->query("SELECT c.id, c.fecha_hora, c.estado, u.nombre AS cliente_nombre, s.nombre AS servicio_nombre FROM citas c JOIN usuarios u ON c.id_cliente = u.id JOIN servicios s ON c.id_servicio = s.id WHERE c.estado != 'cancelada' ORDER BY c.fecha_hora ASC");
 $citas = $citas_stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 

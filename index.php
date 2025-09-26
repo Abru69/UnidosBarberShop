@@ -125,11 +125,20 @@ if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === 'cliente') {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
+
+
+
+/* Estilos para el Logo en la sección Hero */
+.hero-logo {
+    max-width: 850px; /* Ajusta el tamaño del logo como prefieras */
+    margin-bottom: 40px; /* Crea un espacio entre el logo y el título */
+}
 </style>
 <body>
     <section class="hero">
-        <div class="hero-text">
-            <h1>Estilo y Tradición en Cada Corte</h1>
+    <div class="hero-text">
+        <img src="../images/UBS_LOGO.png" alt="Logo de Unidos Barber Shop" class="hero-logo">
+        <h1>Estilo y Tradición en Cada Corte</h1>
             <p>La experiencia de una barbería clásica con un toque moderno. Tu estilo es nuestra pasión.</p>
             <a href="<?= $cta_link ?>" class="cta-button">Agendar Cita Ahora</a>
         </div>

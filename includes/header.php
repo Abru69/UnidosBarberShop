@@ -4,18 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barbería Don Bigotes</title>
+    <title>Unidos Barber Shop</title>
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
     <header>
         <nav class="container">
-            <h1><a href="../index.php" style="color:white; text-decoration:none;">Barbería</a></h1>
+            <h1><a href="../index.php" style="color:white; text-decoration:none;">Unidos Barber Shop</a></h1>
             <div>
                 <?php if (isset($_SESSION['usuario_id'])): ?>
                     <?php if ($_SESSION['usuario_rol'] === 'barbero'): ?>
                         <a href="../barber/dashboard.php">Ver Citas</a>
                         <a href="../barber/gestionar_servicio.php">Gestionar Servicios</a>
+                        <a href="../barber/gestionar_horario.php">Gestionar Mi Disponibilidad</a>
                     <?php else: ?>
                         <a href="../client/dashboard.php">Mis Citas</a>
                     <?php endif; ?>
