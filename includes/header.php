@@ -18,7 +18,7 @@
                         <a href="../barber/gestionar_servicio.php">Gestionar Servicios</a>
                         <a href="../barber/gestionar_horario.php">Gestionar Mi Disponibilidad</a>
                     <?php else: ?>
-                        <a href="../client/dashboard.php">Mis Citas</a>
+                        <a href="../client/citas.php">Mis Citas</a>
                     <?php endif; ?>
                     <a href="/auth/logout.php">Cerrar Sesión</a>
                 <?php else: ?>
