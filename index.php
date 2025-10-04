@@ -29,7 +29,7 @@ if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === 'cliente') {
         }
 
         #loader-logo {
-            max-width: 250px;
+            max-width: 500px;
             opacity: 0; /* Inicia invisible para la animación */
         }
         
@@ -155,13 +155,14 @@ if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === 'cliente') {
 <body class="loading">
 
     <div id="loader-overlay">
-        <img src="images/UBS_LOGO.png" alt="Cargando..." id="loader-logo">
+        <img src="images/UBS.svg" alt="Cargando..." id="loader-logo">
+        <p>Cargando</p>
     </div>
     
     <div id="main-content">
         <section class="hero">
             <div class="hero-text">
-                <img src="images/UBS_LOGO.png" alt="Logo de Unidos Barber Shop" class="hero-logo">
+                <img src="images/UBS.svg" alt="Logo de Unidos Barber Shop" class="hero-logo">
                 <h1>Estilo y Tradición en Cada Corte</h1>
                 <p>La experiencia de una barbería clásica con un toque moderno. Tu estilo es nuestra pasión.</p>
                 <a href="<?= $cta_link ?>" class="cta-button">Agendar Cita Ahora</a>
@@ -202,23 +203,52 @@ if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === 'cliente') {
 
     <script>
         window.addEventListener('load', () => {
-            anime({
-                targets: '#loader-logo',
-                opacity: [0, 1],
-                translateY: [25, 0],
-                duration: 1500,
+            const logo = '#loader-logo';
+
+            // Crea una línea de tiempo para encadenar animaciones
+            const timeline = anime.timeline({
                 easing: 'easeOutExpo',
-                complete: function() {
-                    setTimeout(() => {
-                        document.body.classList.remove('loading');
-                        setTimeout(() => {
-                            const loaderOverlay = document.getElementById('loader-overlay');
-                            if (loaderOverlay) loaderOverlay.style.display = 'none';
-                        }, 800);
-                    }, 500);
-                }
+                duration: 800 // Duración base para la mayoría de los pasos
             });
+
+            timeline
+            // 1. Entrada: Aparece rebotando, escalando y girando ligeramente
+            .add({
+                targets: logo,
+                opacity: [0, 1], // Inicia invisible, termina visible
+                scale: [0.4, 1.1, 1], // Efecto de rebote (scale up, over, back to normal)
+                rotate: ['-10deg', '0deg'],
+                duration: 1200, // Un poco más de tiempo para la entrada
+                easing: 'spring(1, 80, 10, 0)' // Easing con sensación de resorte/rebote
+            })
+            // 2. Animación media: Pulso sutil para mantener la atención
+            .add({
+                targets: logo,
+                scale: [1, 1.05, 1], // Ligeramente más grande y de vuelta a 1
+                rotate: ['0deg', '2deg', '0deg'], // Pequeño giro
+                duration: 1000,
+                easing: 'easeInOutSine'
+            }, '-=200') // Inicia 200ms antes de que termine el paso 1 para un flujo más suave
+            
+            // 3. Salida: Se encoge rápidamente y activa el cierre del loader
+            .add({
+                targets: logo,
+                scale: 0.8,
+                opacity: 0,
+                duration: 400,
+                easing: 'easeInSine',
+                complete: function() {
+                    // Cierra el loader después de que el logo se ha encogido
+                    document.body.classList.remove('loading');
+                    
+                    // Espera a que termine la transición de CSS (0.8s en tu style.css)
+                    setTimeout(() => {
+                        const loaderOverlay = document.getElementById('loader-overlay');
+                        if (loaderOverlay) loaderOverlay.style.display = 'none';
+                    }, 800);
+                }
+            }, '+=300'); // Espera 300ms después del pulso antes de iniciar la salida
         });
-    </script>
+    </script>s
 </body>
 </html>
