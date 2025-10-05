@@ -142,5 +142,18 @@ tr:hover {
 .error { background-color: #f8d7da; color: #721c24; }
 
 
+/** aqui va los estilos de la imagen de dasborad el cliente */
+.ImagenCorte {
+    width: 90%;                 
+    max-width: 800px;           
+    margin: 0 auto;           
+    text-align: center;         
+}
+
+.ImagenCorte img {
+    max-width: 100%;           
+    height: auto;               
+    display: inline-block;     
+}
 
 

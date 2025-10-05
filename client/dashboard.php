@@ -98,5 +98,6 @@ document.addEventListener('DOMContentLoaded', function() {
     <?php include '../includes/footer.php'; ?>
     <div class="dashboard-banner">
  </div>
+ <div class="ImagenCorte"> <img src="../images/Corte_barber.png" alt="Corte de cabello"> </div>
 </body>
 </html>
