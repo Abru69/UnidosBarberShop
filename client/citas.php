@@ -19,9 +19,14 @@ $citas = $citas_stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="loader.css">
     <title>Document</title>
 </head>
 <body>
+    <div class="loader-overlay">
+    <div class="loader"></div>
+</div>
+
     <h3>Mis Citas</h3>
     <table>
         <thead>
@@ -55,6 +60,7 @@ $citas = $citas_stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php else: ?>
                 <tr><td colspan="5">Aún no tienes citas agendadas.</td></tr>
             <?php endif; ?>
+            <script src="loader.js"></script>
         </tbody>
     </table>
 
