@@ -2,7 +2,7 @@
 $host = 'localhost';
 $dbname = 'barberia_bd';
 $user = 'root';
-$password = 'root';
+$password = '';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $password);
