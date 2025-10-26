@@ -1,7 +1,6 @@
 <?php
 require_once '../config/database.php';
-// Requerimos el header.php de la carpeta includes
-include '../includes/header.php';
+include '../includes/header.php'; // Esto ya incluye <html>, <head>, <header> y <main>
 $message = '';
 
 if (isset($_SESSION['usuario_id'])) {
@@ -31,33 +30,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="../css/style.css">
-</head>
-<body>
-<div class="form-container">
-    <h2>Iniciar Sesión</h2>
+<div class="bg-white p-6 md:p-8 rounded-lg shadow-lg max-w-md mx-auto my-8">
+    <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Iniciar Sesión</h2>
+    
     <?php if(!empty($message)): ?>
-        <p class="message error"><?= $message ?></p>
+        <p class="p-4 mb-4 rounded-md bg-red-100 text-red-700 text-center"><?= $message ?></p>
     <?php endif; ?>
-    <form action="login.php" method="POST">
-        <div class="form-group">
-            <label for="email">Correo Electrónico</label>
-            <input type="email" name="email" id="email" required>
+    
+    <form action="login.php" method="POST" class="space-y-4">
+        <div>
+            <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Correo Electrónico</label>
+            <input type="email" name="email" id="email" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
-        <div class="form-group">
-            <label for="password">Contraseña</label>
-            <input type="password" name="password" id="password" required>
+        <div>
+            <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
+            <input type="password" name="password" id="password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
-        <button type="submit" class="btn">Entrar</button>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors">
+            Entrar
+        </button>
     </form>
 </div>
 
-<?php include '../includes/footer.php'; ?>
-</body>
-</html>
+<?php include '../includes/footer.php'; // Esto cierra </main>, <body> y <html> ?>

@@ -7,28 +7,27 @@ session_start();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Usuario - Unidos Barber Shop</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <header>
-        <nav class="container">
-            <h1>
-                <a href="../index.php" style="color:white; text-decoration:none;">Unidos Barber Shop</a>
+<body class="bg-gray-100 font-sans text-gray-800 leading-normal">
+    <header class="bg-gray-800 text-white p-4 border-b-4 border-blue-600 shadow-lg">
+        <nav class="container mx-auto flex justify-between items-center px-4 md:px-0">
+            <h1 class="text-2xl font-bold">
+                <a href="../index.php" class="text-white no-underline hover:text-blue-300 transition-colors">Unidos Barber Shop</a>
             </h1>
-            <div>
+            <div class="flex space-x-3">
                 <?php if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === 'cliente'): ?>
-                        <?php if (basename($_SERVER['PHP_SELF']) !== 'citas.php'): ?>
-                        <a href="../client/citas.php">Mis Citas</a>
+                    <?php if (basename($_SERVER['PHP_SELF']) !== 'citas.php'): ?>
+                        <a href="../client/citas.php" class="px-3 py-2 rounded-md hover:bg-blue-600 transition-colors">Mis Citas</a>
                     <?php endif; ?>
-                    <a href="../client/dashboard.php">Agendar Nueva Cita</a>
-                    <a href="../auth/logout.php">Cerrar Sesión</a>
-                    
+                    <a href="../client/dashboard.php" class="px-3 py-2 rounded-md hover:bg-blue-600 transition-colors">Agendar Nueva Cita</a>
+                    <a href="../auth/logout.php" class="px-3 py-2 rounded-md bg-red-600 hover:bg-red-700 transition-colors">Cerrar Sesión</a>
                 <?php else: ?>
-                    <a href="../auth/login.php">Iniciar Sesión</a>
-                    <a href="../auth/registro.php">Registrarse</a>
+                    <a href="../auth/login.php" class="px-3 py-2 rounded-md hover:bg-blue-600 transition-colors">Iniciar Sesión</a>
+                    <a href="../auth/registro.php" class="px-3 py-2 rounded-md hover:bg-blue-600 transition-colors">Registrarse</a>
                 <?php endif; ?>
             </div>
         </nav>
     </header>
-
-    <main class="container">
+    
+    <main class="container mx-auto p-4 md:p-6">

@@ -1,4 +1,4 @@
-/* Estilos Generales */
+/* Estilos Generales 
 body {
     font-family: 'Arial', sans-serif;
     background-color: #f4f4f4;
@@ -15,7 +15,7 @@ body {
     padding: 20px 0;
 }
 
-/* Encabezado y Navegación */
+/* Encabezado y Navegación 
 header {
     background: #333;
     color: #fff;
@@ -47,7 +47,7 @@ nav a:hover {
     border-radius: 5px;
 }
 
-/* Formularios */
+/* Formularios 
 .form-container {
     background: #fff;
     padding: 30px;
@@ -96,7 +96,7 @@ nav a:hover {
     background: #0a65b8;
 }
 
-/* Tablas (Para Dashboards) */
+/* Tablas (Para Dashboards) 
 table {
     width: 100%;
     border-collapse: collapse;
@@ -131,7 +131,7 @@ tr:hover {
 .confirm-link { background-color: #28a745; }
 .cancel-link { background-color: #dc3545; }
 
-/* Mensajes de feedback */
+/* Mensajes de feedback 
 .message {
     padding: 15px;
     margin-bottom: 20px;
@@ -141,19 +141,4 @@ tr:hover {
 .success { background-color: #d4edda; color: #155724; }
 .error { background-color: #f8d7da; color: #721c24; }
 
-
-/** aqui va los estilos de la imagen de dasborad el cliente */
-.ImagenCorte {
-    width: 90%;                 
-    max-width: 800px;           
-    margin: 0 auto;           
-    text-align: center;         
-}
-
-.ImagenCorte img {
-    max-width: 100%;           
-    height: auto;               
-    display: inline-block;     
-}
-
-
+*/

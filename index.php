@@ -6,194 +6,57 @@ $cta_link = 'auth/login.php';
 if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === 'cliente') {
     $cta_link = 'client/dashboard.php';
 }
+
+// Sobrescribir la clase <body> añadida en header.php para esta página específica
+echo '<script>document.body.classList.add("loading");</script>';
 ?>
 
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unidos Barber Shop</title>
-    <link rel="stylesheet" href="css/style.css"> 
-    <style>
-        /* --- ESTILOS PARA LA ANIMACIÓN (AÑADIDOS) --- */
-        #loader-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.8s ease-out;
-        }
-
-        #loader-logo {
-            max-width: 500px;
-            opacity: 0; /* Inicia invisible para la animación */
-        }
-        
-        .loading #main-content {
-            display: none;
-        }
-        
-        body:not(.loading) #loader-overlay {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        /* --- TUS ESTILOS ORIGINALES (INTACTOS) --- */
-        .hero {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1599351548092-93c691884047?q=80&w=2070&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            color: #fff;
-            min-height: 80vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .hero-text h1 {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .hero-text p {
-            font-size: 1.2rem;
-            max-width: 600px;
-            margin: 0 auto 30px auto;
-        }
-
-        .cta-button {
-            background-color: #0779e4;
-            color: #fff;
-            padding: 15px 30px;
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-
-        .cta-button:hover {
-            background-color: #0a65b8;
-            transform: translateY(-3px);
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-top: 40px;
-            margin-bottom: 30px;
-            color: #333;
-        }
-
-        .services-preview {
-            padding: 40px 0;
-        }
-
-        .service-cards {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .card {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            width: 300px;
-            padding: 30px;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-10px);
-        }
-
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-
-        .card h3 {
-            margin-bottom: 10px;
-            font-size: 1.5rem;
-        }
-
-        .gallery-preview {
-            padding: 40px 0;
-            background-color: #fff;
-        }
-
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-
-        .gallery-grid img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .hero-logo {
-            max-width: 850px; 
-            margin-bottom: 40px;
-        }
-    </style>
-</head>
-<body class="loading">
-
-    <div id="loader-overlay">
-        <img src="images/UBS.svg" alt="Cargando..." id="loader-logo">
-        <p>Cargando</p>
+    <div id="loader-overlay" class="fixed top-0 left-0 w-full h-full bg-gray-800 flex flex-col justify-center items-center z-50 transition-opacity duration-800 ease-out">
+        <img src="images/UBS.svg" alt="Cargando..." id="loader-logo" class="max-w-xs md:max-w-md opacity-0">
+        <p class="text-white text-lg mt-4">Cargando</p>
     </div>
     
     <div id="main-content">
-        <section class="hero">
+        <section class="hero bg-cover bg-center text-white min-h-[80vh] flex justify-center items-center text-center p-5" style="background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1599351548092-93c691884047?q=80&w=2070&auto=format&fit=crop');">
             <div class="hero-text">
-                <img src="images/UBS.svg" alt="Logo de Unidos Barber Shop" class="hero-logo">
-                <h1>Estilo y Tradición en Cada Corte</h1>
-                <p>La experiencia de una barbería clásica con un toque moderno. Tu estilo es nuestra pasión.</p>
-                <a href="<?= $cta_link ?>" class="cta-button">Agendar Cita Ahora</a>
+                <img src="images/UBS.svg" alt="Logo de Unidos Barber Shop" class="max-w-lg lg:max-w-2xl mx-auto mb-10">
+                <h1 class="text-4xl md:text-5xl font-bold mb-5" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Estilo y Tradición en Cada Corte</h1>
+                <p class="text-lg md:text-xl max-w-xl mx-auto mb-8">La experiencia de una barbería clásica con un toque moderno. Tu estilo es nuestra pasión.</p>
+                <a href="<?= $cta_link ?>" class="bg-blue-600 text-white py-3 px-8 no-underline text-lg font-bold rounded-lg shadow-lg transition-all duration-300 ease-out hover:bg-blue-700 hover:-translate-y-1 transform">
+                    Agendar Cita Ahora
+                </a>
             </div>
         </section>
 
-        <section class="services-preview">
-            <h2 class="section-title">Nuestros Servicios</h2>
-            <div class="service-cards">
-                <div class="card">
-                    <div class="card-icon">✂️</div>
-                    <h3>Corte de Cabello</h3>
+        <section class="services-preview py-16">
+            <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">Nuestros Servicios</h2>
+            <div class="service-cards flex flex-wrap justify-center gap-8 px-4">
+                
+                <div class="card bg-white rounded-lg shadow-xl w-full md:w-80 p-8 text-center transition-transform duration-300 ease-out hover:-translate-y-2">
+                    <div class="text-5xl mb-4">✂️</div>
+                    <h3 class="text-2xl font-bold mb-3">Corte de Cabello</h3>
                     <p>Desde los cortes más clásicos hasta las últimas tendencias, definimos tu estilo con precisión.</p>
                 </div>
-                <div class="card">
-                    <div class="card-icon">🧔</div>
-                    <h3>Afeitado y Barba</h3>
+                
+                <div class="card bg-white rounded-lg shadow-xl w-full md:w-80 p-8 text-center transition-transform duration-300 ease-out hover:-translate-y-2">
+                    <div class="text-5xl mb-4">🧔</div>
+                    <h3 class="text-2xl font-bold mb-3">Afeitado y Barba</h3>
                     <p>Un afeitado clásico con toalla caliente y navaja, o un diseño y mantenimiento de barba perfecto.</p>
                 </div>
-                <div class="card">
-                    <div class="card-icon">✨</div>
-                    <h3>Tratamientos</h3>
+                
+                <div class="card bg-white rounded-lg shadow-xl w-full md:w-80 p-8 text-center transition-transform duration-300 ease-out hover:-translate-y-2">
+                    <div class="text-5xl mb-4">✨</div>
+                    <h3 class="text-2xl font-bold mb-3">Tratamientos</h3>
                     <p>Relájate con nuestros tratamientos capilares y faciales para revitalizar tu piel y cabello.</p>
                 </div>
             </div>
         </section>
 
-        <section class="gallery-preview">
-            <h2 class="section-title">Nuestro Trabajo</h2>
-            <div class="gallery-grid">
-            </div>
+        <section class="gallery-preview py-16 bg-white">
+            <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">Nuestro Trabajo</h2>
+            <div class="gallery-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4">
+                <img src="images/Corte_barber.png" alt="Corte de barbería" class="w-full h-full object-cover rounded-lg shadow-md">
+                 </div>
         </section>
     </div>
 
@@ -248,7 +111,16 @@ if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === 'cliente') {
                     }, 800);
                 }
             }, '+=300'); // Espera 300ms después del pulso antes de iniciar la salida
+
+            // --- Lógica para la animación de 'display: none' ---
+            // Este CSS es necesario para que el contenido principal no aparezca
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .loading #main-content { display: none; }
+                body:not(.loading) #loader-overlay { opacity: 0; pointer-events: none; }
+            `;
+            document.head.appendChild(style);
         });
-    </script>s
+    </script>
 </body>
 </html>
