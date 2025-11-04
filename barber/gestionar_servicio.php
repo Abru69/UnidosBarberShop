@@ -14,63 +14,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_servicio'])) {
     $precio = $_POST['precio'];
 
     if (!empty($nombre) && is_numeric($precio)) {
-        $stmt = $pdo->prepare("INSERT INTO servicios (nombre, precio) VALUES (?, ?)");
+        // Aseguramos que se inserta como activo=1 por defecto
+        $stmt = $pdo->prepare("INSERT INTO servicios (nombre, precio, activo) VALUES (?, ?, 1)");
         if ($stmt->execute([$nombre, $precio])) {
-            $message = '<p class="p-4 mb-4 rounded-md bg-green-100 text-green-700 text-center">Servicio añadido con éxito.</p>';
+            $message = '<p class="bg-green-100 text-green-700 p-3 mb-4 rounded text-center">Servicio añadido con éxito.</p>';
         } else {
-            $message = '<p class="p-4 mb-4 rounded-md bg-red-100 text-red-700 text-center">Error al añadir el servicio.</p>';
+            $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error al añadir el servicio.</p>';
         }
     } else {
-        $message = '<p class="p-4 mb-4 rounded-md bg-red-100 text-red-700 text-center">Por favor, introduce un nombre y un precio válido.</p>';
+        $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Por favor, introduce un nombre y un precio válido.</p>';
     }
 }
 
-$servicios = $pdo->query("SELECT * FROM servicios ORDER BY nombre ASC")->fetchAll(PDO::FETCH_ASSOC);
+// CAMBIO: Solo se muestran los servicios activos
+$servicios = $pdo->query("SELECT * FROM servicios WHERE activo = 1 ORDER BY nombre ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<div class="container mx-auto">
-    <h2 class="text-3xl font-bold mb-6 text-gray-800">Gestionar Servicios de la Barbería</h2>
+<div class="max-w-4xl mx-auto">
+    <h2 class="text-3xl font-bold mb-6">Gestionar Servicios de la Barbería</h2>
 
-    <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg max-w-lg mx-auto mb-8">
-        <h3 class="text-2xl font-bold text-center mb-6 text-gray-800">Añadir Nuevo Servicio</h3>
+    <div class="bg-white p-6 mb-8 rounded-lg shadow-xl border border-gray-200">
+        <h3 class="text-xl font-semibold mb-4">Añadir Nuevo Servicio</h3>
         <?php echo $message; ?>
-        <form action="gestionar_servicio.php" method="POST" class="space-y-4">
-            <div>
-                <label for="nombre" class="block text-gray-700 text-sm font-bold mb-2">Nombre del Servicio:</label>
-                <input type="text" name="nombre" id="nombre" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+        <form action="gestionar_servicio.php" method="POST">
+            <div class="mb-4">
+                <label for="nombre" class="block text-gray-700 font-medium mb-1">Nombre del Servicio:</label>
+                <input type="text" name="nombre" id="nombre" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
             </div>
-            <div>
-                <label for="precio" class="block text-gray-700 text-sm font-bold mb-2">Precio (ej: 250.00):</label>
-                <input type="text" name="precio" id="precio" required pattern="[0-9]+(\.[0-9]{1,2})?" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+            <div class="mb-6">
+                <label for="precio" class="block text-gray-700 font-medium mb-1">Precio (ej: 250.00):</label>
+                <input type="text" name="precio" id="precio" required pattern="[0-9]+(\.[0-9]{1,2})?" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
             </div>
-            <button type="submit" name="crear_servicio" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors">
+            <button type="submit" name="crear_servicio" class="w-full bg-primary text-white py-2 px-4 rounded-lg font-bold hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
                 Añadir Servicio
             </button>
         </form>
     </div>
 
-    <h3 class="text-2xl font-bold mb-4 text-gray-800">Servicios Actuales</h3>
-    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <table class="w-full">
+    <h3 class="text-2xl font-semibold mb-4">Servicios Actuales</h3>
+    <div class="overflow-x-auto bg-white rounded-lg shadow-xl border border-gray-200">
+        <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-800 text-white">
                 <tr>
-                    <th class="py-3 px-4 text-left">Nombre</th>
-                    <th class="py-3 px-4 text-left">Precio</th>
-                    <th class="py-3 px-4 text-left">Acciones</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Nombre</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Precio</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Acciones</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
                 <?php foreach ($servicios as $servicio): ?>
                 <tr class="hover:bg-gray-50">
-                    <td class="py-3 px-4"><?= htmlspecialchars($servicio['nombre']) ?></td>
-                    <td class="py-3 px-4">$<?= htmlspecialchars(number_format($servicio['precio'], 2)) ?></td>
-                    <td class="py-3 px-4 space-x-2">
-                        <a href="editar_servicio.php?id=<?= $servicio['id'] ?>" class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold py-1 px-3 rounded-md no-underline transition-colors">
-                            Editar
-                        </a>
-                        <a href="eliminar_servicio.php?id=<?= $servicio['id'] ?>" class="inline-block bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-1 px-3 rounded-md no-underline transition-colors" onclick="return confirm('ADVERTENCIA: Se eliminarán todas las citas asociadas a este servicio. ¿Estás seguro?');">
-                            Eliminar
-                        </a>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars($servicio['nombre']) ?></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">$<?= htmlspecialchars(number_format($servicio['precio'], 2)) ?></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <a href="editar_servicio.php?id=<?= $servicio['id'] ?>" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-green-700 transition-colors mr-2">Editar</a>
+                        <a href="eliminar_servicio.php?id=<?= $servicio['id'] ?>" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors"
+                            onclick="return confirm('¿Estás seguro de que quieres DESACTIVAR este servicio? Las citas existentes NO se eliminarán, pero el servicio ya no estará disponible para nuevas reservas.');">Desactivar</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>

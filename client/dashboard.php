@@ -1,6 +1,7 @@
 <?php
 require_once '../config/database.php';
-include '../includes/header.php'; // Usa el header normal
+// Usamos el header_cliente para este dashboard
+include '../includes/header_cliente.php';
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'cliente') {
     header('Location: ../auth/login.php');
@@ -8,60 +9,113 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'cliente') {
 }
 
 $id_cliente = $_SESSION['usuario_id'];
+// Criterio RF4: Solo mostrar servicios ACTIVOS
 $servicios = $pdo->query("SELECT * FROM servicios WHERE activo = 1 ORDER BY nombre ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+// (La consulta de citas se movió a client/citas.php, este dashboard es solo para agendar)
 ?>
+<p class="text-lg text-gray-700 mb-6">Bienvenido, aquí puedes agendar una nueva cita.</p>
 
-<p class="text-2xl text-gray-800 mb-6">Bienvenido, aquí puedes agendar una nueva cita.</p>
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="bg-white p-8 mt-6 mx-auto max-w-lg rounded-lg shadow-xl border border-gray-200">
+    <h3 class="text-2xl font-bold text-center mb-6">Agendar Nueva Cita</h3>
     
-    <div class="md:col-span-1">
-        <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
-            <h3 class="text-2xl font-bold text-center mb-6 text-gray-800">Agendar Nueva Cita</h3>
-            
-            <div id="mensaje-ajax" class="mb-4"></div>
-            
-            <form id="form-agendar-cita" method="POST" class="space-y-4">
-                <div>
-                    <label for="servicio" class="block text-gray-700 text-sm font-bold mb-2">Selecciona un Servicio:</label>
-                    <select name="servicio" id="servicio" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php foreach ($servicios as $servicio): ?>
-                            <option value="<?= $servicio['id'] ?>"><?= htmlspecialchars($servicio['nombre']) ?> ($<?= number_format($servicio['precio'], 2) ?>)</option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div>
-                    <label for="fechaCita" class="block text-gray-700 text-sm font-bold mb-2">Fecha:</label>
-                    <input type="date" name="fecha" id="fechaCita" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label for="horaCita" class="block text-gray-700 text-sm font-bold mb-2">Hora:</label>
-                    <input type="time" name="hora" id="horaCita" min="09:00" max="21:00" step="1800" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <small class="text-gray-600">Horario de atención: 9:00 AM a 9:00 PM</small>
-                </div>
-                <button type="submit" name="agendar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors">
-                    Agendar Cita
-                </button>
-            </form>
+    <div id="mensaje-ajax" class="mb-4"></div>
+    
+    <form id="form-agendar-cita" method="POST">
+        <div class="mb-4">
+            <label for="servicio" class="block text-gray-700 font-medium mb-1">Selecciona un Servicio:</label>
+            <select name="servicio" id="servicio" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                <?php foreach ($servicios as $servicio): ?>
+                    <option value="<?= $servicio['id'] ?>">
+                        <?= htmlspecialchars($servicio['nombre']) ?> ($<?= number_format($servicio['precio'], 2) ?>)
+                    </option>
+                <?php endforeach; ?>
+            </select>
         </div>
-    </div>
-    
-    <div class="md:col-span-2">
-         <div class="w-full max-w-3xl mx-auto text-center">
-            <img src="../images/Corte_barber.png" alt="Corte de cabello" class="max-w-full h-auto inline-block rounded-lg shadow-xl">
-         </div>
-    </div>
+        
+        <div class="mb-4">
+            <label for="fechaCita" class="block text-gray-700 font-medium mb-1">Fecha:</label>
+            <input type="date" name="fecha" id="fechaCita" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+        </div>
+
+        <div class="mb-6">
+            <label for="horaCita" class="block text-gray-700 font-medium mb-1">Hora:</label>
+            <select name="hora" id="horaCita" required disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-gray-100">
+                <option value="">Selecciona una fecha primero</option>
+            </select>
+            <small class="text-gray-500">Horario de atención: 9:00 AM a 9:00 PM</small>
+        </div>
+        <button type="submit" name="agendar" class="w-full bg-primary text-white py-2 px-4 rounded-lg font-bold hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
+            Agendar Cita
+        </button>
+    </form>
 </div>
+
+<div class="mt-8 max-w-4xl mx-auto">
+    <img src="../images/Corte_barber.png" alt="Corte de cabello" class="w-full h-auto rounded-lg shadow-lg">
+</div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- Lógica de Fecha Mínima (Evitar agendar en el pasado) ---
     const inputFecha = document.getElementById('fechaCita');
     const hoy = new Date();
     const anio = hoy.getFullYear();
     const mes = String(hoy.getMonth() + 1).padStart(2, '0');
     const dia = String(hoy.getDate()).padStart(2, '0');
-    inputFecha.setAttribute('min', `${anio}-${mes}-${dia}`);
+    const fechaMinima = `${anio}-${mes}-${dia}`;
+    inputFecha.setAttribute('min', fechaMinima);
 
+    // --- LÓGICA DE HORARIOS DISPONIBLES (RF2/HU1) ---
+    const selectHora = document.getElementById('horaCita');
+
+    inputFecha.addEventListener('change', function() {
+        const fechaSeleccionada = inputFecha.value;
+
+        // Resetear y deshabilitar el select de hora
+        selectHora.innerHTML = '<option value="">Cargando...</option>';
+        selectHora.disabled = true;
+        selectHora.classList.add('bg-gray-100');
+
+        // Validar que la fecha sea válida y no sea anterior a hoy
+        if (!fechaSeleccionada || fechaSeleccionada < fechaMinima) {
+            selectHora.innerHTML = '<option value="">Selecciona una fecha válida</option>';
+            return;
+        }
+
+        // Llamada AJAX (Fetch) al nuevo endpoint
+        fetch(`consultar_disponibilidad.php?fecha=${fechaSeleccionada}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            selectHora.innerHTML = ''; // Limpiar el "Cargando..."
+            
+            if (data.success && data.horas.length > 0) {
+                data.horas.forEach(hora => {
+                    const option = document.createElement('option');
+                    option.value = hora;
+                    option.textContent = hora;
+                    selectHora.appendChild(option);
+                });
+                selectHora.disabled = false;
+                selectHora.classList.remove('bg-gray-100');
+            } else {
+                selectHora.innerHTML = '<option value="">No hay horas disponibles</option>';
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar horarios:', error);
+            selectHora.innerHTML = '<option value="">Error al cargar horarios</option>';
+        });
+    });
+
+    // --- Lógica de Envío del Formulario (Agendar Cita) ---
     const form = document.getElementById('form-agendar-cita');
     const mensajeDiv = document.getElementById('mensaje-ajax');
 
@@ -79,20 +133,20 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            // Aplicar clases de Tailwind a los mensajes de respuesta
-            let messageClass = data.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
-            mensajeDiv.innerHTML = `<p class="p-4 rounded-md ${messageClass}">${data.message}</p>`;
-
+            // Mostrar mensaje de éxito o error
             if (data.success) {
+                mensajeDiv.innerHTML = `<p class="bg-green-100 text-green-700 p-3 mb-4 rounded text-center">${data.message}</p>`;
                 form.reset();
-                // Opcional: redirigir a 'Mis Citas' después de un éxito
-                setTimeout(() => {
-                    window.location.href = 'citas.php';
-                }, 2000);
+                // Resetear el selector de hora
+                selectHora.innerHTML = '<option value="">Selecciona una fecha primero</option>';
+                selectHora.disabled = true;
+                selectHora.classList.add('bg-gray-100');
+            } else {
+                mensajeDiv.innerHTML = `<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">${data.message}</p>`;
             }
         })
         .catch(error => {
-            mensajeDiv.innerHTML = `<p class="p-4 rounded-md bg-red-100 text-red-700">Error de conexión. Inténtalo de nuevo.</p>`;
+            mensajeDiv.innerHTML = `<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error de conexión. Inténtalo de nuevo.</p>`;
             console.error('Error:', error);
         })
         .finally(() => {

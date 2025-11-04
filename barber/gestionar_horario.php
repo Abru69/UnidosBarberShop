@@ -9,85 +9,87 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'barbero') {
 
 $message = '';
 
+// Lógica para AÑADIR un nuevo bloqueo
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bloquear_horario'])) {
     $fecha_inicio = $_POST['fecha_inicio'] . ' ' . $_POST['hora_inicio'];
     $fecha_fin = $_POST['fecha_fin'] . ' ' . $_POST['hora_fin'];
     $motivo = $_POST['motivo'];
 
     if (!empty($fecha_inicio) && !empty($fecha_fin)) {
+        // Criterio de Éxito RF6: Validar que la fecha de fin sea estrictamente posterior a la de inicio
         if (strtotime($fecha_fin) > strtotime($fecha_inicio)) {
             $stmt = $pdo->prepare("INSERT INTO horarios_bloqueados (fecha_inicio, fecha_fin, motivo) VALUES (?, ?, ?)");
             if ($stmt->execute([$fecha_inicio, $fecha_fin, $motivo])) {
-                $message = '<p class="p-4 mb-4 rounded-md bg-green-100 text-green-700 text-center">Horario bloqueado con éxito.</p>';
+                $message = '<p class="bg-green-100 text-green-700 p-3 mb-4 rounded text-center">Horario bloqueado con éxito.</p>';
             } else {
-                $message = '<p class="p-4 mb-4 rounded-md bg-red-100 text-red-700 text-center">Error al bloquear el horario.</p>';
+                $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error al bloquear el horario.</p>';
             }
         } else {
-            $message = '<p class="p-4 mb-4 rounded-md bg-red-100 text-red-700 text-center">La fecha y hora de fin debe ser posterior a la de inicio.</p>';
+            $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">La fecha y hora de fin debe ser posterior a la de inicio.</p>';
         }
     } else {
-        $message = '<p class="p-4 mb-4 rounded-md bg-red-100 text-red-700 text-center">Por favor, completa todos los campos de fecha y hora.</p>';
+        $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Por favor, completa todos los campos de fecha y hora.</p>';
     }
 }
 
+// Obtener todos los horarios bloqueados para mostrarlos
 $bloqueos = $pdo->query("SELECT * FROM horarios_bloqueados ORDER BY fecha_inicio DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<div class="container mx-auto">
-    <h2 class="text-3xl font-bold mb-6 text-gray-800">Gestionar Mi Disponibilidad</h2>
+<div class="max-w-4xl mx-auto">
+    <h2 class="text-3xl font-bold mb-6">Gestionar Mi Disponibilidad</h2>
 
-    <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg max-w-2xl mx-auto mb-8">
-        <h3 class="text-2xl font-bold text-center mb-6 text-gray-800">Bloquear un Período de Tiempo</h3>
+    <div class="bg-white p-6 mb-8 rounded-lg shadow-xl border border-gray-200">
+        <h3 class="text-xl font-semibold mb-4">Bloquear un Período de Tiempo</h3>
         <?php echo $message; ?>
         <form action="gestionar_horario.php" method="POST">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="fecha_inicio" class="block text-gray-700 text-sm font-bold mb-2">Fecha de Inicio:</label>
-                    <input type="date" name="fecha_inicio" id="fecha_inicio" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label for="fecha_inicio" class="block text-gray-700 font-medium mb-1">Fecha de Inicio:</label>
+                    <input type="date" name="fecha_inicio" id="fecha_inicio" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
-                 <div>
-                    <label for="hora_inicio" class="block text-gray-700 text-sm font-bold mb-2">Hora de Inicio:</label>
-                    <input type="time" name="hora_inicio" id="hora_inicio" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+                <div class="mb-4">
+                    <label for="hora_inicio" class="block text-gray-700 font-medium mb-1">Hora de Inicio:</label>
+                    <input type="time" name="hora_inicio" id="hora_inicio" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
-                <div>
-                    <label for="fecha_fin" class="block text-gray-700 text-sm font-bold mb-2">Fecha de Fin:</label>
-
-                    <input type="date" name="fecha_fin" id="fecha_fin" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+                <div class="mb-4">
+                    <label for="fecha_fin" class="block text-gray-700 font-medium mb-1">Fecha de Fin:</label>
+                    <input type="date" name="fecha_fin" id="fecha_fin" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
-                <div>
-                    <label for="hora_fin" class="block text-gray-700 text-sm font-bold mb-2">Hora de Fin:</label>
-                    <input type="time" name="hora_fin" id="hora_fin" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+                <div class="mb-4">
+                    <label for="hora_fin" class="block text-gray-700 font-medium mb-1">Hora de Fin:</label>
+                    <input type="time" name="hora_fin" id="hora_fin" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
             </div>
-            <div class="mb-4">
-                <label for="motivo" class="block text-gray-700 text-sm font-bold mb-2">Motivo (opcional):</label>
-                <input type="text" name="motivo" id="motivo" placeholder="Ej: Vacaciones, Comida, Asunto personal" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+            <div class="mb-6">
+                <label for="motivo" class="block text-gray-700 font-medium mb-1">Motivo (opcional):</label>
+                <input type="text" name="motivo" id="motivo" placeholder="Ej: Vacaciones, Comida, Asunto personal" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
             </div>
-            <button type="submit" name="bloquear_horario" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors">
+            <button type="submit" name="bloquear_horario" class="w-full bg-primary text-white py-2 px-4 rounded-lg font-bold hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
                 Bloquear Horario
             </button>
         </form>
     </div>
 
-    <h3 class="text-2xl font-bold mb-4 text-gray-800">Mis Períodos Bloqueados</h3>
-    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <table class="w-full">
+    <h3 class="text-2xl font-semibold mb-4">Mis Períodos Bloqueados</h3>
+    <div class="overflow-x-auto bg-white rounded-lg shadow-xl border border-gray-200">
+        <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-800 text-white">
                 <tr>
-                    <th class="py-3 px-4 text-left">Desde</th>
-                    <th class="py-3 px-4 text-left">Hasta</th>
-                    <th class="py-3 px-4 text-left">Motivo</th>
-                    <th class="py-3 px-4 text-left">Acciones</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Desde</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Hasta</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Motivo</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Acciones</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
                 <?php foreach ($bloqueos as $bloqueo): ?>
                 <tr class="hover:bg-gray-50">
-                    <td class="py-3 px-4"><?= htmlspecialchars(date('d/m/Y h:i A', strtotime($bloqueo['fecha_inicio']))) ?></td>
-                    <td class="py-3 px-4"><?= htmlspecialchars(date('d/m/Y h:i A', strtotime($bloqueo['fecha_fin']))) ?></td>
-                    <td class="py-3 px-4"><?= htmlspecialchars($bloqueo['motivo']) ?></td>
-                    <td class="py-3 px-4">
-                        <a href="eliminar_horario.php?id=<?= $bloqueo['id'] ?>" class="inline-block bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-1 px-3 rounded-md no-underline transition-colors" onclick="return confirm('¿Estás seguro de que quieres eliminar este bloqueo?');">Eliminar</a>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars(date('d/m/Y h:i A', strtotime($bloqueo['fecha_inicio']))) ?></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars(date('d/m/Y h:i A', strtotime($bloqueo['fecha_fin']))) ?></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars($bloqueo['motivo']) ?></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <a href="eliminar_horario.php?id=<?= $bloqueo['id'] ?>" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors" onclick="return confirm('¿Estás seguro de que quieres eliminar este bloqueo?');">Eliminar</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>
