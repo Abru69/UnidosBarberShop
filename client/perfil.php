@@ -1,6 +1,6 @@
 <?php
 require_once '../config/database.php';
-include '../includes/header_cliente.php'; // Usa el header de cliente
+include '../includes/header.php';
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'cliente') {
     header('Location: ../auth/login.php');

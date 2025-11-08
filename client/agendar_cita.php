@@ -26,6 +26,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt_check_bloqueo->execute([$fecha_hora, $fecha_hora]);
     $esta_bloqueado = $stmt_check_bloqueo->fetchColumn();
 
+    // ***** VERIFICACIÓN DE DOBLE RESERVA *****
+    $stmt_check_citas = $pdo->prepare("SELECT COUNT(*) FROM citas WHERE fecha_hora = ? AND estado IN ('confirmada', 'pendiente')");
+    $stmt_check_citas->execute([$fecha_hora]);
+    $citas_existentes = $stmt_check_citas->fetchColumn();
+
+    $stmt_check_bloqueo = $pdo->prepare("SELECT COUNT(*) FROM horarios_bloqueados WHERE ? >= fecha_inicio AND ? < fecha_fin");
+    $stmt_check_bloqueo->execute([$fecha_hora, $fecha_hora]);
+    $esta_bloqueado = $stmt_check_bloqueo->fetchColumn();
+
+    // Si la cita ya existe (porque el Cliente A la tomó) O está bloqueada
+    if ($citas_existentes > 0 || $esta_bloqueado > 0) {
+        // El Cliente B recibirá este error
+        $response['message'] = 'Lo sentimos, esa hora ya no está disponible. Por favor, elige otra.';
+    } else {
+        // Solo si está libre, el Cliente B puede insertarla
+        $stmt = $pdo->prepare("INSERT INTO citas (id_cliente, id_servicio, fecha_hora, estado) VALUES (?, ?, ?, 'pendiente')");
+        // ... (lógica de inserción) ...
+    }
+
     if ($citas_existentes > 0 || $esta_bloqueado > 0) {
         $response['message'] = 'Lo sentimos, esa hora ya no está disponible. Por favor, elige otra.';
     } else {

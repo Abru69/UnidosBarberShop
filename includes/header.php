@@ -41,6 +41,8 @@
 
                     <?php else: ?>
                         <a href="../client/citas.php" class="hover:bg-primary px-3 py-1 rounded transition-colors">Mis Citas</a>
+                        <a href="../client/dashboard.php" class="hover:bg-primary px-3 py-1 rounded transition-colors">Agendar Nueva Cita</a>
+                        <a href="../client/perfil.php" class="hover:bg-primary px-3 py-1 rounded transition-colors">Mi Perfil</a>
                     <?php endif; ?>
                     
                     <a href="../auth/logout.php" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded transition-colors">Cerrar Sesión</a>
