@@ -1,4 +1,16 @@
-<?php session_start(); ?>
+<?php 
+session_start(); 
+
+// --- INICIO DE PROTECCIÓN CSRF (Riesgo 2) ---
+// Generar un token CSRF si no existe uno en la sesión
+if (empty($_SESSION['csrf_token'])) {
+    // Usar random_bytes para una alta entropía
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrf_token = $_SESSION['csrf_token'];
+// --- FIN DE PROTECCIÓN CSRF ---
+
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -41,11 +53,11 @@
 
                     <?php else: ?>
                         <a href="../client/citas.php" class="hover:bg-primary px-3 py-1 rounded transition-colors">Mis Citas</a>
-                        <a href="../client/dashboard.php" class="hover:bg-primary px-3 py-1 rounded transition-colors">Agendar Nueva Cita</a>
+                        <a href="../client/dashboard.php" class="hover:bg-primary px-3 py-1 rounded transition-colors">Agendar Cita</a>
                         <a href="../client/perfil.php" class="hover:bg-primary px-3 py-1 rounded transition-colors">Mi Perfil</a>
                     <?php endif; ?>
                     
-                    <a href="../auth/logout.php" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded transition-colors">Cerrar Sesión</a>
+                    <a href="../auth/logout.php?token=<?= $csrf_token ?>" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded transition-colors">Cerrar Sesión</a>
                 
                 <?php else: ?>
                     <a href="../auth/login.php" class="hover:bg-primary px-3 py-1 rounded transition-colors">Iniciar Sesión</a>

@@ -1,13 +1,13 @@
 <?php
 require_once '../config/database.php';
-include '../includes/header.php';
+include '../includes/header.php'; // $csrf_token disponible
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'barbero') {
     header('Location: ../auth/login.php');
     exit;
 }
 
-// Consulta CORREGIDA para no mostrar citas con estado 'cancelada'
+// (La consulta de $citas permanece igual)
 $citas_stmt = $pdo->query("SELECT c.id, c.fecha_hora, c.estado, u.nombre AS cliente_nombre, s.nombre AS servicio_nombre FROM citas c JOIN usuarios u ON c.id_cliente = u.id JOIN servicios s ON c.id_servicio = s.id WHERE c.estado != 'cancelada' ORDER BY c.fecha_hora ASC");
 $citas = $citas_stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -45,8 +45,8 @@ $citas = $citas_stmt->fetchAll(PDO::FETCH_ASSOC);
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <?php if ($cita['estado'] === 'pendiente'): ?>
-                                <a href="actualizar_cita.php?id=<?= $cita['id'] ?>&accion=confirmada" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-green-700 transition-colors mr-2">Confirmar</a>
-                                <a href="actualizar_cita.php?id=<?= $cita['id'] ?>&accion=cancelada" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors">Cancelar</a>
+                                <a href="actualizar_cita.php?id=<?= $cita['id'] ?>&accion=confirmada&token=<?= $csrf_token ?>" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-green-700 transition-colors mr-2">Confirmar</a>
+                                <a href="actualizar_cita.php?id=<?= $cita['id'] ?>&accion=cancelada&token=<?= $csrf_token ?>" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors">Cancelar</a>
                             <?php endif; ?>
                         </td>
                     </tr>

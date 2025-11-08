@@ -2,6 +2,12 @@
 require_once '../config/database.php';
 session_start();
 
+// --- INICIO DE VALIDACIÓN CSRF ---
+if (!isset($_GET['token']) || !hash_equals($_SESSION['csrf_token'], $_GET['token'])) {
+    die('Error de validación de seguridad (CSRF).');
+}
+// --- FIN DE VALIDACIÓN CSRF ---
+
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'barbero') {
     header('Location: ../auth/login.php');
     exit;

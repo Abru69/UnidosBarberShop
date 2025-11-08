@@ -1,34 +1,41 @@
 <?php
 require_once '../config/database.php';
-include '../includes/header.php';
+include '../includes/header.php'; // $csrf_token disponible
 $message = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nombre = $_POST['nombre'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
 
-    // 1. Verificar si el email ya existe (Criterio de Éxito RF1 / Riesgo 2)
-    $stmt_check = $pdo->prepare('SELECT id FROM usuarios WHERE email = :email');
-    $stmt_check->bindParam(':email', $email);
-    $stmt_check->execute();
-    
-    if ($stmt_check->rowCount() > 0) {
-        $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">El correo electrónico ya está registrado. Por favor, <a href="login.php" class="text-red-900 underline">inicia sesión</a>.</p>';
+    // --- INICIO DE VALIDACIÓN CSRF ---
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+         $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error de validación de seguridad. Intente de nuevo.</p>';
     } else {
-        // 2. Insertar nuevo usuario
-        $sql = "INSERT INTO usuarios (nombre, email, password, rol) VALUES (:nombre, :email, :password, 'cliente')";
-        $stmt = $pdo->prepare($sql);
-        $password_hash = password_hash($password, PASSWORD_BCRYPT);
+        // --- FIN VALIDACIÓN CSRF ---
 
-        $stmt->bindParam(':nombre', $nombre);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':password', $password_hash);
+        $nombre = $_POST['nombre'];
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+
+        // (Lógica de validación de email único...)
+        $stmt_check = $pdo->prepare('SELECT id FROM usuarios WHERE email = :email');
+        $stmt_check->bindParam(':email', $email);
+        $stmt_check->execute();
         
-        if ($stmt->execute()) {
-            $message = '<p class="bg-green-100 text-green-700 p-3 mb-4 rounded text-center">Usuario creado con éxito. Ahora puedes <a href="login.php" class="text-green-900 underline">iniciar sesión</a>.</p>';
+        if ($stmt_check->rowCount() > 0) {
+            $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">El correo electrónico ya está registrado. Por favor, <a href="login.php" class="text-red-900 underline">inicia sesión</a>.</p>';
         } else {
-            $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Lo sentimos, hubo un problema al crear tu cuenta.</p>';
+            $sql = "INSERT INTO usuarios (nombre, email, password, rol) VALUES (:nombre, :email, :password, 'cliente')";
+            $stmt = $pdo->prepare($sql);
+            $password_hash = password_hash($password, PASSWORD_BCRYPT);
+
+            $stmt->bindParam(':nombre', $nombre);
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':password', $password_hash);
+            
+            if ($stmt->execute()) {
+                $message = '<p class="bg-green-100 text-green-700 p-3 mb-4 rounded text-center">Usuario creado con éxito. Ahora puedes <a href="login.php" class="text-green-900 underline">iniciar sesión</a>.</p>';
+            } else {
+                $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Lo sentimos, hubo un problema al crear tu cuenta.</p>';
+            }
         }
     }
 }
@@ -40,6 +47,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?= $message ?>
     <?php endif; ?>
     <form action="registro.php" method="POST">
+        
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token); ?>">
+        
         <div class="mb-4">
             <label for="nombre" class="block text-gray-700 font-medium mb-1">Nombre Completo</label>
             <input type="text" name="nombre" id="nombre" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">

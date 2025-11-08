@@ -1,6 +1,6 @@
 <?php
 require_once '../config/database.php';
-include '../includes/header.php';
+include '../includes/header.php'; // $csrf_token disponible
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'barbero') {
     header('Location: ../auth/login.php');
@@ -11,24 +11,30 @@ $message = '';
 
 // Lógica para AÑADIR un nuevo bloqueo
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bloquear_horario'])) {
-    $fecha_inicio = $_POST['fecha_inicio'] . ' ' . $_POST['hora_inicio'];
-    $fecha_fin = $_POST['fecha_fin'] . ' ' . $_POST['hora_fin'];
-    $motivo = $_POST['motivo'];
+    
+    // --- INICIO DE VALIDACIÓN CSRF ---
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error de validación de seguridad.</p>';
+    } else {
+        // --- FIN VALIDACIÓN CSRF ---
+        $fecha_inicio = $_POST['fecha_inicio'] . ' ' . $_POST['hora_inicio'];
+        $fecha_fin = $_POST['fecha_fin'] . ' ' . $_POST['hora_fin'];
+        $motivo = $_POST['motivo'];
 
-    if (!empty($fecha_inicio) && !empty($fecha_fin)) {
-        // Criterio de Éxito RF6: Validar que la fecha de fin sea estrictamente posterior a la de inicio
-        if (strtotime($fecha_fin) > strtotime($fecha_inicio)) {
-            $stmt = $pdo->prepare("INSERT INTO horarios_bloqueados (fecha_inicio, fecha_fin, motivo) VALUES (?, ?, ?)");
-            if ($stmt->execute([$fecha_inicio, $fecha_fin, $motivo])) {
-                $message = '<p class="bg-green-100 text-green-700 p-3 mb-4 rounded text-center">Horario bloqueado con éxito.</p>';
+        if (!empty($fecha_inicio) && !empty($fecha_fin)) {
+            if (strtotime($fecha_fin) > strtotime($fecha_inicio)) {
+                $stmt = $pdo->prepare("INSERT INTO horarios_bloqueados (fecha_inicio, fecha_fin, motivo) VALUES (?, ?, ?)");
+                if ($stmt->execute([$fecha_inicio, $fecha_fin, $motivo])) {
+                    $message = '<p class="bg-green-100 text-green-700 p-3 mb-4 rounded text-center">Horario bloqueado con éxito.</p>';
+                } else {
+                    $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error al bloquear el horario.</p>';
+                }
             } else {
-                $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error al bloquear el horario.</p>';
+                $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">La fecha y hora de fin debe ser posterior a la de inicio.</p>';
             }
         } else {
-            $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">La fecha y hora de fin debe ser posterior a la de inicio.</p>';
+            $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Por favor, completa todos los campos de fecha y hora.</p>';
         }
-    } else {
-        $message = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Por favor, completa todos los campos de fecha y hora.</p>';
     }
 }
 
@@ -43,12 +49,14 @@ $bloqueos = $pdo->query("SELECT * FROM horarios_bloqueados ORDER BY fecha_inicio
         <h3 class="text-xl font-semibold mb-4">Bloquear un Período de Tiempo</h3>
         <?php echo $message; ?>
         <form action="gestionar_horario.php" method="POST">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token); ?>">
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="mb-4">
                     <label for="fecha_inicio" class="block text-gray-700 font-medium mb-1">Fecha de Inicio:</label>
                     <input type="date" name="fecha_inicio" id="fecha_inicio" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
-                <div class="mb-4">
+                 <div class="mb-4">
                     <label for="hora_inicio" class="block text-gray-700 font-medium mb-1">Hora de Inicio:</label>
                     <input type="time" name="hora_inicio" id="hora_inicio" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
@@ -89,7 +97,7 @@ $bloqueos = $pdo->query("SELECT * FROM horarios_bloqueados ORDER BY fecha_inicio
                     <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars(date('d/m/Y h:i A', strtotime($bloqueo['fecha_fin']))) ?></td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars($bloqueo['motivo']) ?></td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="eliminar_horario.php?id=<?= $bloqueo['id'] ?>" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors" onclick="return confirm('¿Estás seguro de que quieres eliminar este bloqueo?');">Eliminar</a>
+                        <a href="eliminar_horario.php?id=<?= $bloqueo['id'] ?>&token=<?= $csrf_token ?>" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors" onclick="return confirm('¿Estás seguro de que quieres eliminar este bloqueo?');">Eliminar</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>

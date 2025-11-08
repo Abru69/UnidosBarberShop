@@ -3,6 +3,12 @@
 require_once '../config/database.php';
 session_start();
 
+// --- INICIO DE VALIDACIÓN CSRF ---
+if (!isset($_GET['token']) || !hash_equals($_SESSION['csrf_token'], $_GET['token'])) {
+    die('Error de validación de seguridad (CSRF).');
+}
+// --- FIN DE VALIDACIÓN CSRF ---
+
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'barbero') {
     header('Location: ../auth/login.php');
     exit;
@@ -10,8 +16,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'barbero') {
 
 if (isset($_GET['id'])) {
     $id_servicio = $_GET['id'];
-    // CAMBIO CLAVE: Implementar Soft Delete (establecer activo = 0) en lugar de DELETE.
-    // Criterio de Éxito RF4: NO elimina citas asociadas, solo oculta el servicio.
+    // Implementar Soft Delete (establecer activo = 0)
     $stmt = $pdo->prepare("UPDATE servicios SET activo = 0 WHERE id = ?");
     $stmt->execute([$id_servicio]);
 }

@@ -1,6 +1,6 @@
 <?php
 require_once '../config/database.php';
-include '../includes/header.php';
+include '../includes/header.php'; // $csrf_token disponible
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'cliente') {
     header('Location: ../auth/login.php');
@@ -13,53 +13,64 @@ $message_pass = '';
 
 // --- Lógica para Actualizar Información (Nombre/Email) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar_info'])) {
-    $nombre = $_POST['nombre'];
-    $email = $_POST['email'];
-
-    // Criterio RF1 (Email Único): Verificar que el email no esté en uso por OTRO usuario
-    $stmt_check = $pdo->prepare("SELECT id FROM usuarios WHERE email = ? AND id != ?");
-    $stmt_check->execute([$email, $id_usuario]);
     
-    if ($stmt_check->rowCount() > 0) {
-        $message_info = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Ese correo electrónico ya está en uso por otra cuenta.</p>';
+    // --- VALIDACIÓN CSRF ---
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        $message_info = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error de validación de seguridad.</p>';
     } else {
-        $stmt = $pdo->prepare("UPDATE usuarios SET nombre = ?, email = ? WHERE id = ?");
-        if ($stmt->execute([$nombre, $email, $id_usuario])) {
-            $message_info = '<p class="bg-green-100 text-green-700 p-3 mb-4 rounded text-center">Información actualizada con éxito.</p>';
+        // --- FIN VALIDACIÓN CSRF ---
+        $nombre = $_POST['nombre'];
+        $email = $_POST['email'];
+
+        $stmt_check = $pdo->prepare("SELECT id FROM usuarios WHERE email = ? AND id != ?");
+        $stmt_check->execute([$email, $id_usuario]);
+        
+        if ($stmt_check->rowCount() > 0) {
+            $message_info = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Ese correo electrónico ya está en uso por otra cuenta.</p>';
         } else {
-            $message_info = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error al actualizar la información.</p>';
+            $stmt = $pdo->prepare("UPDATE usuarios SET nombre = ?, email = ? WHERE id = ?");
+            if ($stmt->execute([$nombre, $email, $id_usuario])) {
+                $message_info = '<p class="bg-green-100 text-green-700 p-3 mb-4 rounded text-center">Información actualizada con éxito.</p>';
+            } else {
+                $message_info = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error al actualizar la información.</p>';
+            }
         }
     }
 }
 
-// --- Lógica para Cambiar Contraseña (Criterio de Éxito RF7) ---
+// --- Lógica para Cambiar Contraseña ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cambiar_pass'])) {
-    $pass_actual = $_POST['password_actual'];
-    $pass_nueva = $_POST['password_nueva'];
-    $pass_confirmar = $_POST['password_confirmar'];
+    
+    // --- VALIDACIÓN CSRF ---
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        $message_pass = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error de validación de seguridad.</p>';
+    } else {
+        // --- FIN VALIDACIÓN CSRF ---
+        $pass_actual = $_POST['password_actual'];
+        $pass_nueva = $_POST['password_nueva'];
+        $pass_confirmar = $_POST['password_confirmar'];
 
-    // 1. Obtener la contraseña actual hasheada del usuario
-    $stmt_user = $pdo->prepare("SELECT password FROM usuarios WHERE id = ?");
-    $stmt_user->execute([$id_usuario]);
-    $usuario = $stmt_user->fetch(PDO::FETCH_ASSOC);
+        $stmt_user = $pdo->prepare("SELECT password FROM usuarios WHERE id = ?");
+        $stmt_user->execute([$id_usuario]);
+        $usuario = $stmt_user->fetch(PDO::FETCH_ASSOC);
 
-    // 2. Verificar que la contraseña actual es correcta
-    if ($usuario && password_verify($pass_actual, $usuario['password'])) {
-        // 3. Verificar que las nuevas contraseñas coinciden
-        if ($pass_nueva === $pass_confirmar) {
-            // 4. Hashear y actualizar la nueva contraseña
-            $password_hash = password_hash($pass_nueva, PASSWORD_BCRYPT);
-            $stmt_update = $pdo->prepare("UPDATE usuarios SET password = ? WHERE id = ?");
-            if ($stmt_update->execute([$password_hash, $id_usuario])) {
-                $message_pass = '<p class="bg-green-100 text-green-700 p-3 mb-4 rounded text-center">Contraseña cambiada con éxito.</p>';
+        if ($usuario && password_verify($pass_actual, $usuario['password'])) {
+            if ($pass_nueva === $pass_confirmar && !empty($pass_nueva)) {
+                $password_hash = password_hash($pass_nueva, PASSWORD_BCRYPT);
+                $stmt_update = $pdo->prepare("UPDATE usuarios SET password = ? WHERE id = ?");
+                if ($stmt_update->execute([$password_hash, $id_usuario])) {
+                    $message_pass = '<p class="bg-green-100 text-green-700 p-3 mb-4 rounded text-center">Contraseña cambiada con éxito.</p>';
+                } else {
+                    $message_pass = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error al cambiar la contraseña.</p>';
+                }
+            } else if (empty($pass_nueva)) {
+                 $message_pass = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">La nueva contraseña no puede estar vacía.</p>';
             } else {
-                $message_pass = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Error al cambiar la contraseña.</p>';
+                $message_pass = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Las nuevas contraseñas no coinciden.</p>';
             }
         } else {
-            $message_pass = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">Las nuevas contraseñas no coinciden.</p>';
+            $message_pass = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">La contraseña actual es incorrecta.</p>';
         }
-    } else {
-        $message_pass = '<p class="bg-red-100 text-red-700 p-3 mb-4 rounded text-center">La contraseña actual es incorrecta.</p>';
     }
 }
 
@@ -75,6 +86,8 @@ $usuario_actual = $stmt->fetch(PDO::FETCH_ASSOC);
     <h3 class="text-2xl font-bold text-center mb-6">Información Personal</h3>
     <?= $message_info ?>
     <form action="perfil.php" method="POST">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token); ?>">
+        
         <div class="mb-4">
             <label for="nombre" class="block text-gray-700 font-medium mb-1">Nombre Completo</label>
             <input type="text" name="nombre" id="nombre" value="<?= htmlspecialchars($usuario_actual['nombre']) ?>" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
@@ -93,6 +106,8 @@ $usuario_actual = $stmt->fetch(PDO::FETCH_ASSOC);
     <h3 class="text-2xl font-bold text-center mb-6">Cambiar Contraseña</h3>
     <?= $message_pass ?>
     <form action="perfil.php" method="POST">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token); ?>">
+        
         <div class="mb-4">
             <label for="password_actual" class="block text-gray-700 font-medium mb-1">Contraseña Actual</label>
             <input type="password" name="password_actual" id="password_actual" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
