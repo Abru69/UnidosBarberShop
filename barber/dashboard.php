@@ -7,7 +7,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'barbero') {
     exit;
 }
 
-// (La consulta de $citas permanece igual)
+// --- 1. Consulta para la TABLA (se mantiene igual) ---
 $citas_stmt = $pdo->query("SELECT c.id, c.fecha_hora, c.estado, u.nombre AS cliente_nombre, s.nombre AS servicio_nombre FROM citas c JOIN usuarios u ON c.id_cliente = u.id JOIN servicios s ON c.id_servicio = s.id WHERE c.estado != 'cancelada' ORDER BY c.fecha_hora ASC");
 $citas = $citas_stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -15,7 +15,9 @@ $citas = $citas_stmt->fetchAll(PDO::FETCH_ASSOC);
 <h2 class="text-3xl font-bold mb-4">Panel de Administración de Citas</h2>
 <p class="text-gray-600 mb-6">Aquí puedes ver y gestionar todas las citas agendadas.</p>
 
-<div class="overflow-x-auto bg-white rounded-lg shadow-xl border border-gray-200">
+<!-- =========TABLA DE CITAS========= -->
+<h3 class="text-2xl font-semibold mb-4">Citas en Lista</h3>
+<div class="overflow-x-auto bg-white rounded-lg shadow-xl border border-gray-200 mb-12">
     <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-800 text-white">
             <tr>
@@ -38,13 +40,13 @@ $citas = $citas_stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <?php 
                                     if ($cita['estado'] === 'confirmada') echo 'bg-green-100 text-green-800';
                                     elseif ($cita['estado'] === 'pendiente') echo 'bg-yellow-100 text-yellow-800';
-                                    else echo 'bg-red-100 text-red-800';
                                 ?>">
                                 <?= htmlspecialchars(ucfirst($cita['estado'])) ?>
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <?php if ($cita['estado'] === 'pendiente'): ?>
+                                <!-- Enlaces de acción PROTEGIDOS -->
                                 <a href="actualizar_cita.php?id=<?= $cita['id'] ?>&accion=confirmada&token=<?= $csrf_token ?>" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-green-700 transition-colors mr-2">Confirmar</a>
                                 <a href="actualizar_cita.php?id=<?= $cita['id'] ?>&accion=cancelada&token=<?= $csrf_token ?>" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors">Cancelar</a>
                             <?php endif; ?>
@@ -52,10 +54,65 @@ $citas = $citas_stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
-                <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay citas para mostrar.</td></tr>
+                <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay citas para mostrar en la lista.</td></tr>
             <?php endif; ?>
         </tbody>
     </table>
 </div>
+
+<!-- =========  CALENDARIO  ======== -->
+<h3 class="text-2xl font-semibold mb-4">Citas en Calendario</h3>
+
+<!-- Cargar el script de FullCalendar -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+
+<!-- Contenedor del Calendario -->
+<div id="calendario-barbero-container" class="bg-white p-4 md:p-6 rounded-lg shadow-xl border border-gray-200">
+    <div id="calendario-barbero"></div>
+</div>
+
+<!-- Script de Inicialización de FullCalendar -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendario-barbero');
+    
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        // Vistas solicitadas: Semana (default) y Día
+        initialView: 'timeGridWeek', 
+        locale: 'es', // Español
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            // Vistas solicitadas por el usuario: Semana y Día
+            right: 'timeGridWeek,timeGridDay,dayGridMonth'
+        },
+        
+        // Cargar los eventos desde el nuevo endpoint
+        events: 'obtener_eventos_barbero.php', 
+
+        height: 'auto', // Responsivo
+        
+        // Limitar las horas visibles a las de la barbería
+        slotMinTime: '09:00:00',
+        slotMaxTime: '22:00:00',
+        allDaySlot: false, // No mostrar el slot "todo el día"
+        
+        eventTimeFormat: { 
+            hour: '2-digit',
+            minute: '2-digit',
+            meridiem: false // Formato 24h (ej. 14:30)
+        },
+        
+        buttonText: {
+            week: 'Semana',
+            day: 'Día',
+            month: 'Mes'
+        }
+    });
+    
+    // Renderizar el calendario
+    calendar.render();
+});
+</script>
 
 <?php include '../includes/footer.php'; ?>
