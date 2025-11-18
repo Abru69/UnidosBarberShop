@@ -80,30 +80,57 @@ $bloqueos = $pdo->query("SELECT * FROM horarios_bloqueados ORDER BY fecha_inicio
     </div>
 
     <h3 class="text-2xl font-semibold mb-4">Mis Períodos Bloqueados</h3>
-    <div class="overflow-x-auto bg-white rounded-lg shadow-xl border border-gray-200">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-800 text-white">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Desde</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Hasta</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Motivo</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Acciones</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                <?php foreach ($bloqueos as $bloqueo): ?>
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars(date('d/m/Y h:i A', strtotime($bloqueo['fecha_inicio']))) ?></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars(date('d/m/Y h:i A', strtotime($bloqueo['fecha_fin']))) ?></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars($bloqueo['motivo']) ?></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="eliminar_horario.php?id=<?= $bloqueo['id'] ?>&token=<?= $csrf_token ?>" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors" onclick="return confirm('¿Estás seguro de que quieres eliminar este bloqueo?');">Eliminar</a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+
+<div id="BloqueosContainer" class="bg-white rounded-lg shadow-xl border border-gray-200">
+
+    <!-- Se muestra solo para las pantallas grandes-->
+    <div class="bloqueos-header hidden md:grid grid-cols-4 bg-gray-800 text-white px-6 py-3 text-xs font-medium uppercase tracking-wider">
+        <div>Desde</div>
+        <div>Hasta</div>
+        <div>Motivo</div>
+        <div>Acciones</div>
     </div>
+
+    <div class="divide-y divide-gray-200">
+
+        <?php foreach ($bloqueos as $bloqueo): ?>
+        <div class="bloqueo-row grid md:grid-cols-4 gap-4 px-6 py-4 hover:bg-gray-50">
+
+          
+            <div>
+                <span class="label block md:hidden font-semibold text-gray-600">Desde:</span>
+                <?= htmlspecialchars(date('d/m/Y h:i A', strtotime($bloqueo['fecha_inicio']))) ?>
+            </div>
+
+    
+            <div>
+                <span class="label block md:hidden font-semibold text-gray-600">Hasta:</span>
+                <?= htmlspecialchars(date('d/m/Y h:i A', strtotime($bloqueo['fecha_fin']))) ?>
+            </div>
+
+            
+            <div>
+                <span class="label block md:hidden font-semibold text-gray-600">Motivo:</span>
+                <?= htmlspecialchars($bloqueo['motivo']) ?>
+            </div>
+
+            
+            <div class="acciones text-sm text-right md:text-left font-medium">
+                <span class="label block md:hidden font-semibold text-gray-600">Acciones:</span>
+
+                <a href="eliminar_horario.php?id=<?= $bloqueo['id'] ?>&token=<?= $csrf_token ?>"
+                   class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors"
+                   onclick="return confirm('¿Estás seguro de que quieres eliminar este bloqueo?');">
+                    Eliminar
+                </a>
+            </div>
+
+        </div>
+        <?php endforeach; ?>
+
+    </div>
+</div>
+
 </div>
 
 <?php include '../includes/footer.php'; ?>

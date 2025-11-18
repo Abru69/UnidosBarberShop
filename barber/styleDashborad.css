@@ -1,0 +1,72 @@
+
+@media (max-width: 480px) {
+
+    #CitaListas .cita-row {
+        display: block !important;
+        padding: 18px;
+        background: #fff;
+        margin-bottom: 14px;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+    }
+
+    #CitaListas .label {
+        display: block !important;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 3px;
+    }
+
+    #CitaListas .acciones {
+        text-align: center !important;
+        margin-top: 12px;
+    }
+
+    #CitaListas .acciones a {
+        margin: 6px;
+        display: inline-block;
+    }
+
+    #CitaListas .encabezado {
+        display: none !important;
+    }
+}
+
+
+@media  (max-width: 687px) {
+
+    #CitaListas .cita-row {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 14px;
+        padding: 16px;
+    }
+
+    #CitaListas .label {
+        display: none !important;
+    }
+
+    #CitaListas .acciones {
+        text-align: right;
+    }
+}
+
+
+@media (min-width: 1024px) {
+
+    #CitaListas .cita-row {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr 1fr auto;
+        padding: 18px;
+        align-items: center;
+    }
+
+    #CitaListas .encabezado {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr 1fr auto;
+    }
+
+    #CitaListas .label {
+        display: none !important;
+    }
+}

@@ -17,48 +17,81 @@ $citas = $citas_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!-- =========TABLA DE CITAS========= -->
 <h3 class="text-2xl font-semibold mb-4">Citas en Lista</h3>
-<div class="overflow-x-auto bg-white rounded-lg shadow-xl border border-gray-200 mb-12">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-800 text-white">
-            <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Cliente</th>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Servicio</th>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Fecha y Hora</th>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Estado</th>
-                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Acciones</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-            <?php if (count($citas) > 0): ?>
-                <?php foreach ($citas as $cita): ?>
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars($cita['cliente_nombre']) ?></td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars($cita['servicio_nombre']) ?></td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars(date('d/m/Y h:i A', strtotime($cita['fecha_hora']))) ?></td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                <?php 
-                                    if ($cita['estado'] === 'confirmada') echo 'bg-green-100 text-green-800';
-                                    elseif ($cita['estado'] === 'pendiente') echo 'bg-yellow-100 text-yellow-800';
-                                ?>">
-                                <?= htmlspecialchars(ucfirst($cita['estado'])) ?>
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <?php if ($cita['estado'] === 'pendiente'): ?>
-                                <!-- Enlaces de acción PROTEGIDOS -->
-                                <a href="actualizar_cita.php?id=<?= $cita['id'] ?>&accion=confirmada&token=<?= $csrf_token ?>" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-green-700 transition-colors mr-2">Confirmar</a>
-                                <a href="actualizar_cita.php?id=<?= $cita['id'] ?>&accion=cancelada&token=<?= $csrf_token ?>" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors">Cancelar</a>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay citas para mostrar en la lista.</td></tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
+
+<div class="bg-white rounded-lg shadow-xl border border-gray-200 mb-12" id="CitaListas">
+
+    <!-- Este es solo para las pantallas grandes-->
+    <div class="encabezado hidden md:grid grid-cols-5 bg-gray-800 text-white px-6 py-3 text-xs font-medium uppercase tracking-wider">
+        <div>Cliente</div>
+        <div>Servicio</div>
+        <div>Fecha y Hora</div>
+        <div>Estado</div>
+        <div>Acciones</div>
+    </div>
+
+    <div class="divide-y divide-gray-200">
+        <?php if (count($citas) > 0): ?>
+            <?php foreach ($citas as $cita): ?>
+
+                <div class="cita-row grid md:grid-cols-5 gap-4 px-6 py-4 hover:bg-gray-50">
+
+                    
+                    <div>
+                        <span class="label block md:hidden font-semibold text-gray-600">Cliente:</span>
+                        <?= htmlspecialchars($cita['cliente_nombre']) ?>
+                    </div>
+
+                    <div>
+                        <span class="label block md:hidden font-semibold text-gray-600">Servicio:</span>
+                        <?= htmlspecialchars($cita['servicio_nombre']) ?>
+                    </div>
+
+                    <div>
+                        <span class="label block md:hidden font-semibold text-gray-600">Fecha y Hora:</span>
+                        <?= htmlspecialchars(date('d/m/Y h:i A', strtotime($cita['fecha_hora']))) ?>
+                    </div>
+
+               
+                    <div>
+                        <span class="label block md:hidden font-semibold text-gray-600">Estado:</span>
+
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            <?php 
+                                if ($cita['estado'] === 'confirmada') echo 'bg-green-100 text-green-800';
+                                elseif ($cita['estado'] === 'pendiente') echo 'bg-yellow-100 text-yellow-800';
+                            ?>">
+                            <?= htmlspecialchars(ucfirst($cita['estado'])) ?>
+                        </span>
+                    </div>
+
+                
+                    <div class="acciones text-sm text-right md:text-left font-medium">
+                        <span class="label block md:hidden font-semibold text-gray-600">Acciones:</span>
+
+                        <?php if ($cita['estado'] === 'pendiente'): ?>
+                            <a href="actualizar_cita.php?id=<?= $cita['id'] ?>&accion=confirmada&token=<?= $csrf_token ?>"
+                            class="bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-green-700 transition-colors mr-2">
+                                Confirmar
+                            </a>
+
+                            <a href="actualizar_cita.php?id=<?= $cita['id'] ?>&accion=cancelada&token=<?= $csrf_token ?>"
+                            class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors">
+                                Cancelar
+                            </a>
+                        <?php endif; ?>
+                    </div>
+
+                </div>
+
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="px-6 py-4 text-center text-gray-500">
+                No hay citas para mostrar en la lista.
+            </div>
+        <?php endif; ?>
+    </div>
 </div>
+
 
 <!-- =========  CALENDARIO  ======== -->
 <h3 class="text-2xl font-semibold mb-4">Citas en Calendario</h3>

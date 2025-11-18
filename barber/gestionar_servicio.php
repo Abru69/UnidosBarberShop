@@ -59,32 +59,55 @@ $servicios = $pdo->query("SELECT * FROM servicios WHERE activo = 1 ORDER BY nomb
         </form>
     </div>
 
-    <h3 class="text-2xl font-semibold mb-4">Servicios Actuales (Activos)</h3>
-    <div class="overflow-x-auto bg-white rounded-lg shadow-xl border border-gray-200">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-800 text-white">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Nombre</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Precio</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Acciones</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                <?php foreach ($servicios as $servicio): ?>
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm"><?= htmlspecialchars($servicio['nombre']) ?></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">$<?= htmlspecialchars(number_format($servicio['precio'], 2)) ?></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="editar_servicio.php?id=<?= $servicio['id'] ?>" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-green-700 transition-colors mr-2">Editar</a>
-                        
-                        <a href="eliminar_servicio.php?id=<?= $servicio['id'] ?>&token=<?= $csrf_token ?>" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors"
-                            onclick="return confirm('¿Estás seguro de que quieres DESACTIVAR este servicio? Las citas existentes NO se eliminarán, pero el servicio ya no estará disponible para nuevas reservas.');">Desactivar</a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+   <h3 class="text-2xl font-semibold mb-4">Servicios Actuales (Activos)</h3>
+
+<div id="ServiciosContainer" class="bg-white rounded-lg shadow-xl border border-gray-200">
+
+    <!-- solo para las pantallas grandes -->
+    <div class="servicios-header hidden md:grid grid-cols-3 bg-gray-800 text-white px-6 py-3 text-xs font-medium uppercase tracking-wider">
+        <div>Nombre</div>
+        <div>Precio</div>
+        <div>Acciones</div>
     </div>
+
+    <div class="divide-y divide-gray-200">
+
+        <?php foreach ($servicios as $servicio): ?>
+        <div class="servicio-row grid md:grid-cols-3 gap-4 px-6 py-4 hover:bg-gray-50">
+
+         <
+            <div>
+                <span class="label block md:hidden font-semibold text-gray-600">Nombre:</span>
+                <?= htmlspecialchars($servicio['nombre']) ?>
+            </div>
+
+    
+            <div>
+                <span class="label block md:hidden font-semibold text-gray-600">Precio:</span>
+                $<?= htmlspecialchars(number_format($servicio['precio'], 2)) ?>
+            </div>
+
+            <div class="acciones text-sm text-right md:text-left font-medium">
+                <span class="label block md:hidden font-semibold text-gray-600">Acciones:</span>
+
+                <a href="editar_servicio.php?id=<?= $servicio['id'] ?>" 
+                   class="bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-green-700 transition-colors mr-2">
+                    Editar
+                </a>
+
+                <a href="eliminar_servicio.php?id=<?= $servicio['id'] ?>&token=<?= $csrf_token ?>" 
+                   class="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-colors"
+                   onclick="return confirm('¿Estás seguro de que quieres DESACTIVAR este servicio? Las citas existentes NO se eliminarán, pero el servicio ya no estará disponible para nuevas reservas.');">
+                    Desactivar
+                </a>
+            </div>
+
+        </div>
+        <?php endforeach; ?>
+
+    </div>
+</div>
+
 </div>
 
 <?php include '../includes/footer.php'; ?>
